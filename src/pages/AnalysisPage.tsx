@@ -4,37 +4,25 @@ import { motion } from 'framer-motion';
 import { UploadForm } from '../components/UploadForm';
 import { LoadingAnalysis } from '../components/LoadingAnalysis';
 import { SkillMascote } from '../components/SkillMascote';
-import { analyzeResume, ApiError } from '../services/api';
-import { saveToHistory } from '../utils/localStorage';
-import { generateId } from '../utils/formatters';
-import type { AnalysisRequest } from '../types';
+import { extractPdfText, ApiError } from '../services/api';
 
 export function AnalysisPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (req: AnalysisRequest) => {
+  const handleSubmit = async (file: File) => {
     setLoading(true);
     setError(null);
 
     try {
-      const result = await analyzeResume(req);
-      const entry = {
-        id: generateId(),
-        jobTitle: req.jobTitle,
-        atsScore: result.atsScore,
-        jobMatch: result.jobMatch,
-        analyzedAt: new Date().toISOString(),
-        result,
-      };
-      saveToHistory(entry);
-      navigate('/result', { state: { result } });
+      const extraction = await extractPdfText(file);
+      navigate('/result', { state: { extraction } });
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
       } else {
-        setError('Erro inesperado ao analisar o currículo');
+        setError('Erro inesperado ao ler o currículo');
       }
       setLoading(false);
     }
@@ -65,7 +53,7 @@ export function AnalysisPage() {
             Analisar Currículo
           </h1>
           <p className="text-lg theme-text-secondary max-w-2xl mx-auto">
-            Envie seu PDF, cole a descrição da vaga e receba uma análise completa: score ATS, compatibilidade, palavras-chave faltantes e plano de melhoria
+            Envie seu PDF para extrair e visualizar o texto do currículo
           </p>
         </motion.div>
 

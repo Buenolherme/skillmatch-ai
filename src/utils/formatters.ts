@@ -21,20 +21,6 @@ export function getScoreDescription(score: number): string {
   return 'Seu currículo precisa de uma revisão completa para passar pelos sistemas ATS.';
 }
 
-export function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
-export function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-}
-
 export function getPriorityColor(priority: 'high' | 'medium' | 'low'): string {
   if (priority === 'high') return '#27C9FF';
   if (priority === 'medium') return '#8A4DFF';

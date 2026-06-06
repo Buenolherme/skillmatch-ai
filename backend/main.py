@@ -1,19 +1,12 @@
 import logging
-import os
-from pathlib import Path
 
-from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-BACKEND_ENV = Path(__file__).resolve().parent / ".env"
-load_dotenv(BACKEND_ENV)
-load_dotenv()
-
 try:
-    from .routes.analyze import router as analyze_router
+    from .routes.extract_text import router as extract_text_router
 except ImportError:
-    from routes.analyze import router as analyze_router
+    from routes.extract_text import router as extract_text_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -23,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="SkillMatch AI API",
-    description="Resume analysis API powered by OpenAI",
+    description="PDF resume text extraction API",
     version="1.0.0",
 )
 
@@ -42,19 +35,10 @@ async def health_check():
     return {
         "status": "ok",
         "version": "1.0.0",
-        "openaiConfigured": bool(os.getenv("OPENAI_API_KEY")),
     }
 
 
-app.include_router(analyze_router)
-
-
-@app.on_event("startup")
-async def startup_event():
-    logger.info("=== SkillMatch AI API iniciada ===")
-    logger.info("OPENAI_API_KEY configurada: %s", "Sim" if os.getenv("OPENAI_API_KEY") else "Nao")
-    if not os.getenv("OPENAI_API_KEY"):
-        logger.warning("AVISO: OPENAI_API_KEY nao configurada. As analises reais nao funcionarao.")
+app.include_router(extract_text_router)
 
 
 if __name__ == "__main__":

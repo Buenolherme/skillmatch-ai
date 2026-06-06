@@ -1,11 +1,7 @@
-export interface AnalysisRequest {
-  file: File;
-  jobDescription: string;
-  jobTitle: string;
-  level: 'estagio' | 'junior' | 'pleno';
-  area: string;
-  linkedin?: string;
-  github?: string;
+export interface PdfExtractionResult {
+  filename: string;
+  text: string;
+  characterCount: number;
 }
 
 export interface KeywordItem {
@@ -61,15 +57,6 @@ export interface AnalysisResult {
   risks: string[];
   jobTitle: string;
   analyzedAt: string;
-}
-
-export interface HistoryEntry {
-  id: string;
-  jobTitle: string;
-  atsScore: number;
-  jobMatch: number;
-  analyzedAt: string;
-  result: AnalysisResult;
 }
 
 export type Theme = 'dark' | 'light';

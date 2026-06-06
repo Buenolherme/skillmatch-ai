@@ -1,11 +1,12 @@
 import { motion } from 'framer-motion';
+import scoutAnalystImage from '../assets/scout-analyst.png';
 
 const steps = [
-  { text: 'Extraindo texto do PDF', message: 'Deixe comigo...' },
-  { text: 'Lendo descrição da vaga', message: 'Entendido!' },
-  { text: 'Comparando habilidades', message: 'Analisando...' },
-  { text: 'Calculando score ATS', message: 'Quase lá!' },
-  { text: 'Gerando sugestões', message: 'Finalizando...' },
+  { text: 'Recebendo arquivo PDF', message: 'Deixe comigo...' },
+  { text: 'Validando o documento', message: 'Tudo certo!' },
+  { text: 'Lendo páginas', message: 'Processando...' },
+  { text: 'Extraindo texto do PDF', message: 'Quase lá!' },
+  { text: 'Organizando conteúdo', message: 'Finalizando...' },
   { text: 'Preparando resultado', message: 'Pronto!' },
 ];
 
@@ -35,7 +36,7 @@ export function LoadingAnalysis() {
               }}
             >
               <img
-                src="/Scout_analyst.png"
+                src={scoutAnalystImage}
                 alt="Scout Analyst analisando o currículo"
                 className="w-full h-full object-contain"
                 draggable={false}
@@ -50,7 +51,7 @@ export function LoadingAnalysis() {
             transition={{ delay: 0.2 }}
             className="text-2xl md:text-3xl font-bold text-center mb-2 bg-gradient-neon bg-clip-text text-transparent"
           >
-            Analisando seu currículo
+            Lendo seu currículo
           </motion.h2>
 
           {/* Subtitle with personality */}
@@ -60,7 +61,7 @@ export function LoadingAnalysis() {
             transition={{ delay: 0.3 }}
             className="text-center theme-text-secondary mb-8"
           >
-            Sou Scout, seu especialista em ATS. Deixa eu trabalhar minha mágica!
+            Estou extraindo o texto do seu PDF.
           </motion.p>
 
           {/* Steps Timeline */}

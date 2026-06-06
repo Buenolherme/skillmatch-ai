@@ -1,18 +1,20 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Copy, Download, RotateCcw, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Copy, Download, RotateCcw } from 'lucide-react';
+import { Copyable } from '../components/Copyable';
 import { ResultActions } from '../components/results/ResultActions';
-import { ResultScoreGrid } from '../components/results/ResultScoreGrid';
-import { ResultTabsSection } from '../components/results/ResultTabsSection';
-import type { AnalysisResult } from '../types';
-import { formatDate } from '../utils/formatters';
+import type { PdfExtractionResult } from '../types';
+
+interface ResultLocationState {
+  extraction?: PdfExtractionResult;
+}
 
 export function ResultPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const result: AnalysisResult | null = location.state?.result;
+  const extraction = (location.state as ResultLocationState | null)?.extraction;
 
-  if (!result) {
+  if (!extraction) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="text-center">
@@ -26,87 +28,52 @@ export function ResultPage() {
             </div>
           </motion.div>
           <p className="theme-text-secondary mb-6">
-            Nenhuma análise disponível
+            Nenhum texto extraído disponível
           </p>
           <button
             onClick={() => navigate('/analyze')}
             className="btn-primary"
           >
-            Fazer Análise
+            Enviar PDF
           </button>
         </div>
       </div>
     );
   }
 
-  const handleCopyResume = () => {
-    navigator.clipboard.writeText(result.optimizedResume);
-    alert('Currículo copiado!');
+  const handleCopyText = () => {
+    navigator.clipboard.writeText(extraction.text);
+    alert('Texto copiado!');
   };
 
-  const handleCopyMessage = () => {
-    navigator.clipboard.writeText(result.recruiterMessage);
-    alert('Mensagem copiada!');
-  };
-
-  const handleDownloadPDF = () => {
-    const content = `
-SkillMatch AI - Análise de Currículo
-${formatDate(result.analyzedAt)}
-
-RESULTADO GERAL
-Score ATS: ${result.atsScore}
-Compatibilidade com Vaga: ${result.jobMatch}%
-Clareza do Currículo: ${result.clarityScore}
-
-PONTOS FORTES
-${result.strengths.map((s) => `• ${s}`).join('\n')}
-
-PONTOS A MELHORAR
-${result.weaknesses.map((w) => `• ${w}`).join('\n')}
-
-RISCOS
-${result.risks.map((r) => `• ${r}`).join('\n')}
-
-PALAVRAS-CHAVE ENCONTRADAS
-${result.foundKeywords.filter((k) => k.found).map((k) => k.keyword).join(', ')}
-
-PALAVRAS-CHAVE FALTANDO
-${result.foundKeywords.filter((k) => !k.found).map((k) => k.keyword).join(', ')}
-
-PLANO DE MELHORIA
-${result.improvementPlan.map((p) => `${p.step}. ${p.action}\n${p.detail}`).join('\n\n')}
-    `;
-
-    const url = URL.createObjectURL(new Blob([content], { type: 'text/plain;charset=utf-8' }));
+  const handleDownloadText = () => {
+    const url = URL.createObjectURL(
+      new Blob([extraction.text], { type: 'text/plain;charset=utf-8' })
+    );
     const link = document.createElement('a');
     link.href = url;
-    link.download = `skillmatch-analise-${new Date().getTime()}.txt`;
+    link.download = `${extraction.filename.replace(/\.pdf$/i, '')}.txt`;
+    document.body.appendChild(link);
     link.click();
+    link.remove();
     URL.revokeObjectURL(url);
   };
 
   const actions = [
     {
-      label: 'Copiar Currículo',
+      label: 'Copiar Texto',
       icon: Copy,
-      onClick: handleCopyResume,
+      onClick: handleCopyText,
       className: 'btn-secondary flex items-center gap-2',
     },
     {
-      label: 'Copiar Mensagem',
-      icon: Copy,
-      onClick: handleCopyMessage,
-      className: 'btn-secondary flex items-center gap-2',
-    },
-    {
-      label: 'Baixar Análise',
+      label: 'Baixar Texto',
       icon: Download,
-      onClick: handleDownloadPDF,
+      onClick: handleDownloadText,
       className: 'btn-secondary flex items-center gap-2',
     },
     {
-      label: 'Nova Análise',
+      label: 'Novo PDF',
       icon: RotateCcw,
       onClick: () => navigate('/analyze'),
       className: 'btn-secondary flex items-center gap-2',
@@ -122,22 +89,26 @@ ${result.improvementPlan.map((p) => `${p.step}. ${p.action}\n${p.detail}`).join(
           className="text-center mb-16"
         >
           <h1 className="text-4xl sm:text-5xl font-bold mb-3 theme-text">
-            Sua Análise Completa
+            Texto extraído do PDF
           </h1>
           <p className="theme-text-secondary text-lg">
-            {result.jobTitle} • {formatDate(result.analyzedAt)}
+            {extraction.filename} • {extraction.characterCount} caracteres
           </p>
         </motion.div>
 
-        <ResultScoreGrid
-          result={result}
-          compatibilityDescription={`${result.jobMatch}% de alinhamento com a vaga`}
-          clarityDescription="Estrutura e organização do seu currículo"
-        />
-
         <ResultActions actions={actions} />
 
-        <ResultTabsSection result={result} />
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          <Copyable
+            text={extraction.text}
+            label="Conteúdo extraído"
+            scrollable
+          />
+        </motion.div>
 
         <motion.div
           initial={{ opacity: 0 }}
@@ -145,8 +116,7 @@ ${result.improvementPlan.map((p) => `${p.step}. ${p.action}\n${p.detail}`).join(
           transition={{ delay: 0.35 }}
           className="mt-12 glass-neon p-6 rounded-2xl text-center text-sm theme-text-secondary border border-neon-blue/30"
         >
-          <p className="mb-2 font-medium">Análise gerada por IA. Valide as sugestões antes de usar.</p>
-          <p>Seu currículo não é publicado. Análise serve apenas para gerar este resultado.</p>
+          <p>O texto acima foi extraído diretamente do PDF enviado.</p>
         </motion.div>
       </div>
     </div>

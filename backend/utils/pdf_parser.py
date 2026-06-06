@@ -31,17 +31,18 @@ def extract_text_from_pdf(file_bytes: bytes) -> str:
             logger.warning("PDF está vazio (0 páginas)")
             raise ValueError("PDF está vazio")
 
-        text = ""
+        pages = []
         for page_num, page in enumerate(pdf_reader.pages, 1):
             try:
-                page_text = page.extract_text()
+                page_text = (page.extract_text() or "").strip()
                 logger.info("Página %s: %s caracteres extraídos", page_num, len(page_text))
-                text += page_text
+                if page_text:
+                    pages.append(page_text)
             except Exception as e:
                 logger.warning("Erro ao extrair página %s: %s", page_num, e)
                 continue
 
-        text = text.strip()
+        text = "\n\n".join(pages)
         logger.info("Total extraído: %s caracteres", len(text))
 
         if not text:

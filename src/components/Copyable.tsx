@@ -5,9 +5,10 @@ import { motion } from 'framer-motion';
 interface CopyableProps {
   text: string;
   label: string;
+  scrollable?: boolean;
 }
 
-export function Copyable({ text, label }: CopyableProps) {
+export function Copyable({ text, label, scrollable = false }: CopyableProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -40,7 +41,11 @@ export function Copyable({ text, label }: CopyableProps) {
           </motion.span>
         </motion.button>
       </div>
-      <pre className="text-sm theme-text-secondary whitespace-pre-wrap break-words overflow-hidden max-h-96 theme-code-surface p-4 rounded-lg leading-relaxed font-mono">
+      <pre
+        className={`text-sm theme-text-secondary whitespace-pre-wrap break-words max-h-96 theme-code-surface p-4 rounded-lg leading-relaxed font-mono ${
+          scrollable ? 'overflow-auto' : 'overflow-hidden'
+        }`}
+      >
         {text}
       </pre>
     </div>

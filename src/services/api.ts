@@ -1,4 +1,4 @@
-import type { AnalysisRequest, AnalysisResult } from '../types';
+import type { PdfExtractionResult } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -12,25 +12,19 @@ export class ApiError extends Error {
   }
 }
 
-export async function analyzeResume(req: AnalysisRequest): Promise<AnalysisResult> {
+export async function extractPdfText(file: File): Promise<PdfExtractionResult> {
   const formData = new FormData();
-  formData.append('file', req.file);
-  formData.append('job_description', req.jobDescription);
-  formData.append('job_title', req.jobTitle);
-  formData.append('level', req.level);
-  formData.append('area', req.area);
-  if (req.linkedin) formData.append('linkedin', req.linkedin);
-  if (req.github) formData.append('github', req.github);
+  formData.append('file', file);
 
   try {
-    const response = await fetch(`${API_BASE}/analyze`, {
+    const response = await fetch(`${API_BASE}/extract-text`, {
       method: 'POST',
       body: formData,
     });
 
     if (!response.ok) {
       let detail: string | undefined;
-      const errorMessage = 'Erro inesperado ao analisar o currículo';
+      const errorMessage = 'Erro inesperado ao ler o currículo';
 
       try {
         const body = await response.json();
@@ -47,7 +41,7 @@ export async function analyzeResume(req: AnalysisRequest): Promise<AnalysisResul
         if (detail?.toLowerCase().includes('vazio')) {
           throw new ApiError(422, 'PDF vazio ou sem conteúdo.', detail);
         }
-        throw new ApiError(422, 'Dados inválidos. Verifique o formulário e tente novamente.', detail);
+        throw new ApiError(422, 'Arquivo inválido. Verifique o PDF e tente novamente.', detail);
       }
 
       if (response.status === 400) {
@@ -60,19 +54,6 @@ export async function analyzeResume(req: AnalysisRequest): Promise<AnalysisResul
         throw new ApiError(400, 'Não foi possível processar o PDF.', detail);
       }
 
-      if (response.status === 503) {
-        if (detail?.toLowerCase().includes('api key')) {
-          throw new ApiError(503, 'Chave da API não configurada. Contate o administrador.', detail);
-        }
-        if (detail?.toLowerCase().includes('timeout')) {
-          throw new ApiError(503, 'Timeout da IA. Tente novamente em alguns momentos.', detail);
-        }
-        if (detail?.toLowerCase().includes('indisponível')) {
-          throw new ApiError(503, 'Serviço de IA temporariamente indisponível. Tente novamente em alguns minutos.', detail);
-        }
-        throw new ApiError(503, 'Falha ao processar com IA. Tente novamente.', detail);
-      }
-
       if (response.status === 500) {
         throw new ApiError(500, 'Erro interno do servidor. Contate o administrador.', detail);
       }
@@ -80,7 +61,7 @@ export async function analyzeResume(req: AnalysisRequest): Promise<AnalysisResul
       throw new ApiError(response.status, errorMessage, detail);
     }
 
-    return (await response.json()) as AnalysisResult;
+    return (await response.json()) as PdfExtractionResult;
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;
@@ -94,6 +75,6 @@ export async function analyzeResume(req: AnalysisRequest): Promise<AnalysisResul
       );
     }
 
-    throw new ApiError(500, 'Erro desconhecido ao analisar o currículo', String(error));
+    throw new ApiError(500, 'Erro desconhecido ao ler o currículo', String(error));
   }
 }
