@@ -35,10 +35,6 @@ export function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
-export function generateFileName(jobTitle: string): string {
-  return `skillmatch-${jobTitle.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}.txt`;
-}
-
 export function getPriorityColor(priority: 'high' | 'medium' | 'low'): string {
   if (priority === 'high') return '#27C9FF';
   if (priority === 'medium') return '#8A4DFF';

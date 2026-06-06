@@ -21,7 +21,7 @@ export interface SectionSuggestion {
   priority: 'high' | 'medium' | 'low';
 }
 
-export interface ProofItem {
+interface ProofItem {
   skill: string;
   status: 'proven' | 'unproven' | 'missing';
   evidence?: string;
@@ -81,9 +81,3 @@ export type AnalysisTab =
   | 'recruiter-msg'
   | 'recruiter-view'
   | 'improvement';
-
-export type LoadingStep = {
-  id: number;
-  label: string;
-  done: boolean;
-};

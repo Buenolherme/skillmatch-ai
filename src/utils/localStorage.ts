@@ -3,7 +3,7 @@ import type { HistoryEntry } from '../types';
 const HISTORY_KEY = 'skillmatch_history';
 const MAX_HISTORY = 3;
 
-export function getHistory(): HistoryEntry[] {
+function getHistory(): HistoryEntry[] {
   try {
     const raw = localStorage.getItem(HISTORY_KEY);
     return raw ? JSON.parse(raw) : [];
@@ -20,8 +20,4 @@ export function saveToHistory(entry: HistoryEntry): void {
   } catch {
     // storage quota exceeded or unavailable
   }
-}
-
-export function clearHistory(): void {
-  localStorage.removeItem(HISTORY_KEY);
 }

@@ -9,18 +9,10 @@ export class ApiError extends Error {
     public detail?: string
   ) {
     super(message);
-    console.error(`[API Error ${status}] ${message}`, detail);
   }
 }
 
 export async function analyzeResume(req: AnalysisRequest): Promise<AnalysisResult> {
-  console.log('[Frontend] Iniciando análise:', {
-    arquivo: req.file.name,
-    tamanho: req.file.size,
-    cargo: req.jobTitle,
-    area: req.area,
-  });
-
   const formData = new FormData();
   formData.append('file', req.file);
   formData.append('job_description', req.jobDescription);
@@ -30,20 +22,10 @@ export async function analyzeResume(req: AnalysisRequest): Promise<AnalysisResul
   if (req.linkedin) formData.append('linkedin', req.linkedin);
   if (req.github) formData.append('github', req.github);
 
-  console.log('[Frontend] Enviando FormData para:', `${API_BASE}/analyze`);
-
   try {
     const response = await fetch(`${API_BASE}/analyze`, {
       method: 'POST',
       body: formData,
-    });
-
-    console.log('[Frontend] Resposta recebida:', {
-      status: response.status,
-      ok: response.ok,
-      headers: {
-        contentType: response.headers.get('content-type'),
-      },
     });
 
     if (!response.ok) {
@@ -53,9 +35,8 @@ export async function analyzeResume(req: AnalysisRequest): Promise<AnalysisResul
       try {
         const body = await response.json();
         detail = body.detail || body.message;
-        console.error('[Frontend] Detalhes do erro:', body);
-      } catch (e) {
-        console.error('[Frontend] Erro ao parsear resposta de erro:', e);
+      } catch {
+        // Error responses are not guaranteed to contain JSON.
       }
 
       // Mensagens de erro específicas
@@ -99,20 +80,13 @@ export async function analyzeResume(req: AnalysisRequest): Promise<AnalysisResul
       throw new ApiError(response.status, errorMessage, detail);
     }
 
-    console.log('[Frontend] Parseando resposta JSON...');
-    const result = (await response.json()) as AnalysisResult;
-    console.log('[Frontend] Análise concluída com sucesso:', {
-      atsScore: result.atsScore,
-      jobMatch: result.jobMatch,
-    });
-    return result;
+    return (await response.json()) as AnalysisResult;
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;
     }
 
     if (error instanceof TypeError) {
-      console.error('[Frontend] Erro de conexão:', error.message);
       throw new ApiError(
         0,
         'Erro de conexão com o servidor. Verifique se o backend está rodando em ' + API_BASE,
@@ -120,20 +94,6 @@ export async function analyzeResume(req: AnalysisRequest): Promise<AnalysisResul
       );
     }
 
-    console.error('[Frontend] Erro desconhecido:', error);
     throw new ApiError(500, 'Erro desconhecido ao analisar o currículo', String(error));
-  }
-}
-
-export async function checkHealth(): Promise<boolean> {
-  try {
-    console.log('[Frontend] Verificando saúde do backend...');
-    const response = await fetch(`${API_BASE}/health`, { method: 'GET' });
-    const ok = response.ok;
-    console.log('[Frontend] Backend status:', ok ? 'OK' : 'ERRO');
-    return ok;
-  } catch (error) {
-    console.error('[Frontend] Erro ao verificar saúde:', error);
-    return false;
   }
 }

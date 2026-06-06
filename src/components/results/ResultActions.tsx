@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import type { LucideIcon } from 'lucide-react';
 
-export interface ResultAction {
+interface ResultAction {
   label: string;
   icon: LucideIcon;
   onClick: () => void;

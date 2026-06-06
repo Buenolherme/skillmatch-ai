@@ -6,11 +6,8 @@ import { AnalysisPage } from './pages/AnalysisPage';
 import { ResultPage } from './pages/ResultPage';
 import { DemoPage } from './pages/DemoPage';
 import { NotFound } from './pages/NotFound';
-import { useTheme } from './hooks/useTheme';
 
 function App() {
-  useTheme();
-
   return (
     <Router>
       <Navbar />
