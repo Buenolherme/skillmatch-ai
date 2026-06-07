@@ -4,6 +4,23 @@ export interface PdfExtractionResult {
   characterCount: number;
 }
 
+export interface ResumeAnalysisRequest {
+  file: File;
+  jobTitle: string;
+  jobDescription: string;
+  level: 'estagio' | 'junior' | 'pleno';
+  area: string;
+}
+
+export interface ResumeAnalysisResult {
+  ats_score: number;
+  compatibilidade: number;
+  pontos_fortes: string[];
+  pontos_fracos: string[];
+  palavras_chave_faltantes: string[];
+  plano_de_melhoria: string[];
+}
+
 export interface KeywordItem {
   keyword: string;
   found: boolean;

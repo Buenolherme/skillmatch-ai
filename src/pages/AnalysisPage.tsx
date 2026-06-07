@@ -4,25 +4,32 @@ import { motion } from 'framer-motion';
 import { UploadForm } from '../components/UploadForm';
 import { LoadingAnalysis } from '../components/LoadingAnalysis';
 import { SkillMascote } from '../components/SkillMascote';
-import { extractPdfText, ApiError } from '../services/api';
+import { analyzeResume, ApiError } from '../services/api';
+import type { ResumeAnalysisRequest } from '../types';
 
 export function AnalysisPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (file: File) => {
+  const handleSubmit = async (input: ResumeAnalysisRequest) => {
     setLoading(true);
     setError(null);
 
     try {
-      const extraction = await extractPdfText(file);
-      navigate('/result', { state: { extraction } });
+      const analysis = await analyzeResume(input);
+      navigate('/result', {
+        state: {
+          analysis,
+          filename: input.file.name,
+          jobTitle: input.jobTitle,
+        },
+      });
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
       } else {
-        setError('Erro inesperado ao ler o currículo');
+        setError('Erro inesperado ao analisar o currículo');
       }
       setLoading(false);
     }
@@ -53,7 +60,7 @@ export function AnalysisPage() {
             Analisar Currículo
           </h1>
           <p className="text-lg theme-text-secondary max-w-2xl mx-auto">
-            Envie seu PDF para extrair e visualizar o texto do currículo
+            Envie seu PDF e compare seu currículo com a vaga desejada
           </p>
         </motion.div>
 

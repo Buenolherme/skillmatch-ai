@@ -1,9 +1,10 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Upload, AlertCircle, CheckCircle2, FileText } from 'lucide-react';
+import type { ResumeAnalysisRequest } from '../types';
 
 interface UploadFormProps {
-  onSubmit: (file: File) => Promise<void>;
+  onSubmit: (input: ResumeAnalysisRequest) => Promise<void>;
   loading: boolean;
   error: string | null;
 }
@@ -73,8 +74,23 @@ export function UploadForm({ onSubmit, loading, error }: UploadFormProps) {
       setValidationError('Selecione um PDF');
       return;
     }
+    if (!jobTitle.trim()) {
+      setValidationError('Informe o cargo desejado');
+      return;
+    }
+    if (!jobDescription.trim()) {
+      setValidationError('Informe a descrição da vaga');
+      return;
+    }
+
     try {
-      await onSubmit(file);
+      await onSubmit({
+        file,
+        jobTitle,
+        jobDescription,
+        level,
+        area,
+      });
     } catch {
       // error handled by parent
     }
@@ -117,7 +133,7 @@ export function UploadForm({ onSubmit, loading, error }: UploadFormProps) {
                   {file.name}
                 </p>
                 <p className="text-xs theme-text-secondary mt-1">
-                  ✓ Pronto para leitura
+                  ✓ Pronto para análise
                 </p>
               </>
             ) : (
@@ -149,7 +165,7 @@ export function UploadForm({ onSubmit, loading, error }: UploadFormProps) {
         transition={{ delay: 0.15 }}
         className="glass-neon-purple p-8 rounded-2xl space-y-6"
       >
-        <h3 className="text-lg font-semibold text-neon-purple">Detalhes da Vaga (Opcional)</h3>
+        <h3 className="text-lg font-semibold text-neon-purple">Detalhes da Vaga</h3>
 
         <div>
           <label className="block text-sm font-medium theme-text mb-2">
@@ -213,7 +229,7 @@ export function UploadForm({ onSubmit, loading, error }: UploadFormProps) {
             Descrição da Vaga
           </span>
           <p className="text-xs theme-text-secondary mb-3">
-            Este campo será utilizado em uma etapa futura
+            Cole a vaga para calcular a compatibilidade do seu currículo
           </p>
           <textarea
             value={jobDescription}
@@ -275,7 +291,7 @@ export function UploadForm({ onSubmit, loading, error }: UploadFormProps) {
           <div className="text-sm theme-text">
             <p className="font-medium mb-1">Seus dados são totalmente privados</p>
             <p className="text-xs theme-text-secondary">
-              Nenhum cadastro necessário. Seu currículo é processado apenas para esta leitura e não é armazenado.
+              Nenhum cadastro necessário. Seu currículo é processado apenas para esta análise e não é armazenado.
             </p>
           </div>
         </div>
@@ -290,7 +306,7 @@ export function UploadForm({ onSubmit, loading, error }: UploadFormProps) {
         disabled={loading}
         className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed py-3 text-base font-semibold"
       >
-        {loading ? 'Lendo...' : 'Ler meu currículo'}
+        {loading ? 'Analisando...' : 'Analisar meu currículo'}
       </motion.button>
     </form>
   );

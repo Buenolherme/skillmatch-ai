@@ -6,8 +6,8 @@ const steps = [
   { text: 'Validando o documento', message: 'Tudo certo!' },
   { text: 'Lendo páginas', message: 'Processando...' },
   { text: 'Extraindo texto do PDF', message: 'Quase lá!' },
-  { text: 'Organizando conteúdo', message: 'Finalizando...' },
-  { text: 'Preparando resultado', message: 'Pronto!' },
+  { text: 'Analisando com Gemini', message: 'Avaliando...' },
+  { text: 'Preparando resultado', message: 'Finalizando...' },
 ];
 
 export function LoadingAnalysis() {
@@ -51,7 +51,7 @@ export function LoadingAnalysis() {
             transition={{ delay: 0.2 }}
             className="text-2xl md:text-3xl font-bold text-center mb-2 bg-gradient-neon bg-clip-text text-transparent"
           >
-            Lendo seu currículo
+            Analisando seu currículo
           </motion.h2>
 
           {/* Subtitle with personality */}
@@ -61,7 +61,7 @@ export function LoadingAnalysis() {
             transition={{ delay: 0.3 }}
             className="text-center theme-text-secondary mb-8"
           >
-            Estou extraindo o texto do seu PDF.
+            Estou comparando seu currículo com a vaga.
           </motion.p>
 
           {/* Steps Timeline */}
