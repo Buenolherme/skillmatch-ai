@@ -12,9 +12,35 @@ export interface ResumeAnalysisRequest {
   area: string;
 }
 
+export interface ProofDetectionItem {
+  habilidade: string;
+  status: 'comprovacao_parcial' | 'sem_comprovacao';
+  risco: 'baixo' | 'medio' | 'alto';
+  motivo: string;
+  como_comprovar: string;
+}
+
+export interface RecruiterPerspective {
+  resumo: string;
+  pontos_de_atencao: string[];
+  pontos_positivos: string[];
+  perguntas_provaveis: string[];
+  risco_de_rejeicao: 'baixo' | 'medio' | 'alto';
+}
+
+export interface EvolutionPlanItem {
+  prioridade: 'alta' | 'media' | 'baixa';
+  acao: string;
+  impacto_estimado: string;
+  prazo_sugerido: string;
+}
+
 export interface ResumeAnalysisResult {
   ats_score: number;
   compatibilidade: number;
+  detector_prova_real: ProofDetectionItem[];
+  visao_recrutador: RecruiterPerspective;
+  plano_evolucao: EvolutionPlanItem[];
   pontos_fortes: string[];
   pontos_fracos: string[];
   palavras_chave_faltantes: string[];
@@ -32,13 +58,6 @@ export interface SectionSuggestion {
   current: string;
   suggestion: string;
   priority: 'high' | 'medium' | 'low';
-}
-
-interface ProofItem {
-  skill: string;
-  status: 'proven' | 'unproven' | 'missing';
-  evidence?: string;
-  message: string;
 }
 
 export interface RecruiterView {
@@ -69,7 +88,7 @@ export interface AnalysisResult {
   recruiterMessage: string;
   coverLetter: string;
   recruiterView: RecruiterView;
-  proofCheck: ProofItem[];
+  detectorProvaReal: ProofDetectionItem[];
   improvementPlan: ImprovementStep[];
   risks: string[];
   jobTitle: string;

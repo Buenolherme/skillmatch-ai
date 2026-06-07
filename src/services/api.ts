@@ -41,6 +41,61 @@ function connectionError(error: unknown, action: string): ApiError {
   return new ApiError(500, `Erro inesperado ao ${action}.`, String(error));
 }
 
+function isProofDetectionItem(value: unknown): boolean {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const item = value as Record<string, unknown>;
+  return (
+    typeof item.habilidade === 'string' &&
+    (item.status === 'comprovacao_parcial' ||
+      item.status === 'sem_comprovacao') &&
+    (item.risco === 'baixo' ||
+      item.risco === 'medio' ||
+      item.risco === 'alto') &&
+    typeof item.motivo === 'string' &&
+    typeof item.como_comprovar === 'string'
+  );
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === 'string');
+}
+
+function isRecruiterPerspective(value: unknown): boolean {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const perspective = value as Record<string, unknown>;
+  return (
+    typeof perspective.resumo === 'string' &&
+    isStringArray(perspective.pontos_de_atencao) &&
+    isStringArray(perspective.pontos_positivos) &&
+    isStringArray(perspective.perguntas_provaveis) &&
+    (perspective.risco_de_rejeicao === 'baixo' ||
+      perspective.risco_de_rejeicao === 'medio' ||
+      perspective.risco_de_rejeicao === 'alto')
+  );
+}
+
+function isEvolutionPlanItem(value: unknown): boolean {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const item = value as Record<string, unknown>;
+  return (
+    (item.prioridade === 'alta' ||
+      item.prioridade === 'media' ||
+      item.prioridade === 'baixa') &&
+    typeof item.acao === 'string' &&
+    typeof item.impacto_estimado === 'string' &&
+    typeof item.prazo_sugerido === 'string'
+  );
+}
+
 function isResumeAnalysisResult(value: unknown): value is ResumeAnalysisResult {
   if (!value || typeof value !== 'object') {
     return false;
@@ -50,6 +105,11 @@ function isResumeAnalysisResult(value: unknown): value is ResumeAnalysisResult {
   return (
     typeof result.ats_score === 'number' &&
     typeof result.compatibilidade === 'number' &&
+    Array.isArray(result.detector_prova_real) &&
+    result.detector_prova_real.every(isProofDetectionItem) &&
+    isRecruiterPerspective(result.visao_recrutador) &&
+    Array.isArray(result.plano_evolucao) &&
+    result.plano_evolucao.every(isEvolutionPlanItem) &&
     Array.isArray(result.pontos_fortes) &&
     Array.isArray(result.pontos_fracos) &&
     Array.isArray(result.palavras_chave_faltantes) &&

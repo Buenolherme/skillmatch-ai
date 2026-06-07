@@ -34,8 +34,12 @@ function formatAnalysis(result: ResumeAnalysisResult): string {
     'Palavras-chave faltantes:',
     ...result.palavras_chave_faltantes.map((item) => `- ${item}`),
     '',
-    'Plano de melhoria:',
-    ...result.plano_de_melhoria.map((item, index) => `${index + 1}. ${item}`),
+    'Plano de evolução:',
+    ...result.plano_evolucao.map(
+      (item, index) =>
+        `${index + 1}. [${item.prioridade}] ${item.acao} ` +
+        `(${item.impacto_estimado}, ${item.prazo_sugerido})`
+    ),
   ].join('\n');
 }
 
@@ -193,9 +197,9 @@ export function ResultPage() {
           <div className="space-y-4">
             <h3 className="font-bold text-xl theme-text flex items-center gap-2">
               <Zap className="w-5 h-5 text-neon-blue" />
-              Plano de Melhoria
+              Plano de Evolução
             </h3>
-            {analysis.plano_de_melhoria.map((item, index) => (
+            {analysis.plano_evolucao.map((item, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, x: -10 }}
@@ -208,7 +212,13 @@ export function ResultPage() {
                   <div className="w-12 h-12 rounded-lg bg-gradient-neon flex items-center justify-center flex-shrink-0 font-bold text-white text-lg">
                     {index + 1}
                   </div>
-                  <p className="theme-text">{item}</p>
+                  <div className="flex-1">
+                    <p className="theme-text">{item.acao}</p>
+                    <p className="text-sm theme-text-secondary mt-1">
+                      Prioridade {item.prioridade} • {item.impacto_estimado} •{' '}
+                      {item.prazo_sugerido}
+                    </p>
+                  </div>
                 </div>
               </motion.div>
             ))}
