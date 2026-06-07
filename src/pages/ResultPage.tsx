@@ -1,17 +1,13 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  AlertCircle,
-  AlertTriangle,
-  CheckCircle,
   CheckCircle2,
   Copy,
   RotateCcw,
-  Zap,
 } from 'lucide-react';
+import { AnalysisDetails } from '../components/results/AnalysisDetails';
 import { ResultActions } from '../components/results/ResultActions';
 import { ScoreCard } from '../components/ScoreCard';
-import { getScoreDescription } from '../utils/formatters';
 import type { ResumeAnalysisResult } from '../types';
 
 interface ResultLocationState {
@@ -21,9 +17,28 @@ interface ResultLocationState {
 }
 
 function formatAnalysis(result: ResumeAnalysisResult): string {
+  const criteria = [
+    ['Compatibilidade com a vaga', result.criterios.compatibilidade_vaga],
+    ['Habilidades técnicas', result.criterios.habilidades_tecnicas],
+    ['Experiências', result.criterios.experiencias],
+    ['Projetos', result.criterios.projetos],
+    ['Formação', result.criterios.formacao],
+    ['Certificações', result.criterios.certificacoes],
+  ] as const;
+
   return [
     `Score ATS: ${result.ats_score}`,
+    result.justificativa_ats,
     `Compatibilidade: ${result.compatibilidade}`,
+    result.justificativa_compatibilidade,
+    '',
+    'Critérios:',
+    ...criteria.map(
+      ([label, criterion]) =>
+        `- ${label}: ${
+          criterion.aplicavel ? `${criterion.pontuacao}/100` : 'não aplicável'
+        } — ${criterion.justificativa}`
+    ),
     '',
     'Pontos fortes:',
     ...result.pontos_fortes.map((item) => `- ${item}`),
@@ -33,6 +48,32 @@ function formatAnalysis(result: ResumeAnalysisResult): string {
     '',
     'Palavras-chave faltantes:',
     ...result.palavras_chave_faltantes.map((item) => `- ${item}`),
+    '',
+    'Requisitos obrigatórios atendidos:',
+    ...result.requisitos_obrigatorios_atendidos.map((item) => `- ${item}`),
+    '',
+    'Requisitos obrigatórios ausentes:',
+    ...result.requisitos_obrigatorios_ausentes.map((item) => `- ${item}`),
+    '',
+    'Detector de prova real:',
+    ...result.detector_prova_real.map(
+      (item) =>
+        `- ${item.habilidade}: ${item.status}, risco ${item.risco}. ` +
+        `${item.motivo} Como comprovar: ${item.como_comprovar}`
+    ),
+    '',
+    'Visão do recrutador:',
+    result.visao_recrutador.resumo,
+    `Risco de rejeição: ${result.visao_recrutador.risco_de_rejeicao}`,
+    ...result.visao_recrutador.pontos_de_atencao.map(
+      (item) => `- Atenção: ${item}`
+    ),
+    ...result.visao_recrutador.pontos_positivos.map(
+      (item) => `- Positivo: ${item}`
+    ),
+    ...result.visao_recrutador.perguntas_provaveis.map(
+      (item) => `- Pergunta provável: ${item}`
+    ),
     '',
     'Plano de evolução:',
     ...result.plano_evolucao.map(
@@ -121,7 +162,7 @@ export function ResultPage() {
             <ScoreCard
               score={analysis.ats_score}
               label="Score ATS"
-              description={getScoreDescription(analysis.ats_score)}
+              description={analysis.justificativa_ats}
             />
           </motion.div>
           <motion.div
@@ -132,98 +173,14 @@ export function ResultPage() {
             <ScoreCard
               score={analysis.compatibilidade}
               label="Compatibilidade"
-              description={`${analysis.compatibilidade}% de compatibilidade com a vaga`}
+              description={analysis.justificativa_compatibilidade}
             />
           </motion.div>
         </div>
 
         <ResultActions actions={actions} />
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="space-y-6"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="glass-neon p-6 rounded-2xl">
-              <h3 className="font-bold text-lg mb-4 flex items-center gap-2 text-neon-blue">
-                <CheckCircle className="w-5 h-5" />
-                Pontos Fortes
-              </h3>
-              <ul className="space-y-3">
-                {analysis.pontos_fortes.map((item, index) => (
-                  <li key={index} className="flex gap-3">
-                    <span className="text-neon-blue mt-0.5 font-semibold">✓</span>
-                    <span className="theme-text">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="glass-neon-purple p-6 rounded-2xl">
-              <h3 className="font-bold text-lg mb-4 flex items-center gap-2 text-neon-purple">
-                <AlertTriangle className="w-5 h-5" />
-                Pontos a Melhorar
-              </h3>
-              <ul className="space-y-3">
-                {analysis.pontos_fracos.map((item, index) => (
-                  <li key={index} className="flex gap-3">
-                    <span className="text-neon-purple mt-0.5 font-semibold">!</span>
-                    <span className="theme-text">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          <div className="glass-neon-purple p-6 rounded-2xl">
-            <h3 className="font-bold text-lg mb-4 text-error flex items-center gap-2">
-              <AlertCircle className="w-5 h-5" />
-              Palavras-chave Faltantes
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {analysis.palavras_chave_faltantes.map((keyword, index) => (
-                <span
-                  key={index}
-                  className="px-3 py-1.5 rounded-full text-sm bg-error/10 border border-error/30 text-error font-medium"
-                >
-                  {keyword}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <h3 className="font-bold text-xl theme-text flex items-center gap-2">
-              <Zap className="w-5 h-5 text-neon-blue" />
-              Plano de Evolução
-            </h3>
-            {analysis.plano_evolucao.map((item, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: -10 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05 }}
-                viewport={{ once: true }}
-                className="glass-neon p-6 rounded-xl hover:shadow-glow-neon-blue transition-all"
-              >
-                <div className="flex gap-4 items-center">
-                  <div className="w-12 h-12 rounded-lg bg-gradient-neon flex items-center justify-center flex-shrink-0 font-bold text-white text-lg">
-                    {index + 1}
-                  </div>
-                  <div className="flex-1">
-                    <p className="theme-text">{item.acao}</p>
-                    <p className="text-sm theme-text-secondary mt-1">
-                      Prioridade {item.prioridade} • {item.impacto_estimado} •{' '}
-                      {item.prazo_sugerido}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+        <AnalysisDetails analysis={analysis} />
       </div>
     </div>
   );

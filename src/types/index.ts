@@ -35,9 +35,30 @@ export interface EvolutionPlanItem {
   prazo_sugerido: string;
 }
 
+export interface CriterionAssessment {
+  pontuacao: number;
+  aplicavel: boolean;
+  justificativa: string;
+  evidencias: string[];
+}
+
+export interface AtsCriteria {
+  compatibilidade_vaga: CriterionAssessment;
+  habilidades_tecnicas: CriterionAssessment;
+  experiencias: CriterionAssessment;
+  projetos: CriterionAssessment;
+  formacao: CriterionAssessment;
+  certificacoes: CriterionAssessment;
+}
+
 export interface ResumeAnalysisResult {
   ats_score: number;
   compatibilidade: number;
+  requisitos_obrigatorios_atendidos: string[];
+  requisitos_obrigatorios_ausentes: string[];
+  justificativa_ats: string;
+  justificativa_compatibilidade: string;
+  criterios: AtsCriteria;
   detector_prova_real: ProofDetectionItem[];
   visao_recrutador: RecruiterPerspective;
   plano_evolucao: EvolutionPlanItem[];
@@ -45,6 +66,7 @@ export interface ResumeAnalysisResult {
   pontos_fracos: string[];
   palavras_chave_faltantes: string[];
   plano_de_melhoria: string[];
+  model: string;
 }
 
 export interface KeywordItem {

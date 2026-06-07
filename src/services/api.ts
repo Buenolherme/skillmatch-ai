@@ -96,6 +96,40 @@ function isEvolutionPlanItem(value: unknown): boolean {
   );
 }
 
+function isScore(value: unknown): value is number {
+  return typeof value === 'number' && value >= 0 && value <= 100;
+}
+
+function isCriterionAssessment(value: unknown): boolean {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const criterion = value as Record<string, unknown>;
+  return (
+    isScore(criterion.pontuacao) &&
+    typeof criterion.aplicavel === 'boolean' &&
+    typeof criterion.justificativa === 'string' &&
+    isStringArray(criterion.evidencias)
+  );
+}
+
+function isAtsCriteria(value: unknown): boolean {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const criteria = value as Record<string, unknown>;
+  return (
+    isCriterionAssessment(criteria.compatibilidade_vaga) &&
+    isCriterionAssessment(criteria.habilidades_tecnicas) &&
+    isCriterionAssessment(criteria.experiencias) &&
+    isCriterionAssessment(criteria.projetos) &&
+    isCriterionAssessment(criteria.formacao) &&
+    isCriterionAssessment(criteria.certificacoes)
+  );
+}
+
 function isResumeAnalysisResult(value: unknown): value is ResumeAnalysisResult {
   if (!value || typeof value !== 'object') {
     return false;
@@ -103,17 +137,23 @@ function isResumeAnalysisResult(value: unknown): value is ResumeAnalysisResult {
 
   const result = value as Record<string, unknown>;
   return (
-    typeof result.ats_score === 'number' &&
-    typeof result.compatibilidade === 'number' &&
+    isScore(result.ats_score) &&
+    isScore(result.compatibilidade) &&
+    isStringArray(result.requisitos_obrigatorios_atendidos) &&
+    isStringArray(result.requisitos_obrigatorios_ausentes) &&
+    typeof result.justificativa_ats === 'string' &&
+    typeof result.justificativa_compatibilidade === 'string' &&
+    isAtsCriteria(result.criterios) &&
     Array.isArray(result.detector_prova_real) &&
     result.detector_prova_real.every(isProofDetectionItem) &&
     isRecruiterPerspective(result.visao_recrutador) &&
     Array.isArray(result.plano_evolucao) &&
     result.plano_evolucao.every(isEvolutionPlanItem) &&
-    Array.isArray(result.pontos_fortes) &&
-    Array.isArray(result.pontos_fracos) &&
-    Array.isArray(result.palavras_chave_faltantes) &&
-    Array.isArray(result.plano_de_melhoria)
+    isStringArray(result.pontos_fortes) &&
+    isStringArray(result.pontos_fracos) &&
+    isStringArray(result.palavras_chave_faltantes) &&
+    isStringArray(result.plano_de_melhoria) &&
+    typeof result.model === 'string'
   );
 }
 
